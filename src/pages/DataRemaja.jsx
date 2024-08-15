@@ -4,6 +4,7 @@ import { deauthUser, isAuthenticated } from "../utils/auth";
 import { Button, Dropdown, Menu, Table, message } from "antd";
 import { sanityClient } from "../lib/sanity/getClient";
 import * as XLSX from 'xlsx';
+import moment from "moment";
 
 const columns = [
   {
@@ -28,7 +29,7 @@ const columns = [
     key: 'waktu',
     render: (item, record) => (
       <div>
-        {record.date}
+        {moment(record.date).subtract(10, 'days').calendar()}
       </div>
     )
   },
@@ -102,7 +103,7 @@ function Home() {
       try {
         setIsLoading(true);
         const sanityData = await sanityClient.fetch(`*[_type == 'data-kunjungan-rohmi']{
-          _id, namaKegiatan, province, regency, district, village, pic, jumlahPeserta, aspirasi, keterangan, fotoEksternal, "foto": foto.asset->url, geometry, user-> {name}
+          _id, namaKegiatan, date, province, regency, district, village, pic, jumlahPeserta, aspirasi, keterangan, fotoEksternal, "foto": foto.asset->url, geometry, user-> {name}
         }`);
 
         setServerData({
@@ -161,6 +162,7 @@ function Home() {
         key: item._id,
         name: item.user.name || "-",
         namaKegiatan: item.namaKegiatan || "-",
+        date: item.date || "-",
         pic: item.pic || "-",
         jumlahPeserta: item.jumlahPeserta || "-",
         aspirasi: item.aspirasi || "-",
@@ -234,6 +236,7 @@ function Home() {
       return {
         'No.': index + 1,
         'Nama Relawan': item.name,
+        'Waktu': `${moment(item.date).subtract(10, 'days').calendar()}`,
         'Lokasi': `${item.village}, ${item.district}, ${item.regency}, ${item.province}`,
         'Nama Kegiatan': item.namaKegiatan,
         'PIC': item.pic,
